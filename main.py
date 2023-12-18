@@ -242,7 +242,10 @@ def get_date_forcecast(data):
     if dataset_name == 'AMAZON.csv' or dataset_name == 'GOOGLE.csv' or dataset_name == 'APPLE.csv':
         data1['Date'] = pd.to_datetime(data1['Date'])
         train_size =  int(len(data1) * 0.8)
-        train, test = data1[:train_size], data1[train_size:]
+        if dataset_name == 'AMAZON.csv' or dataset_name == 'APPLE.csv':
+            train, test = data1[:train_size], data1[train_size+12:]
+        else:
+            train, test = data1[:train_size], data1[train_size+11:]
         cols1,_ = st.columns((1,2))
         format = 'DD/MM/YYYY' 
         start_date = test['Date'].min() 
@@ -257,7 +260,7 @@ def get_date_forcecast(data):
     elif dataset_name == 'Manhattan_NewYork_2010_24-2023.csv':
         data1['DATE'] = pd.to_datetime(data1['DATE'])
         train_size =  int(len(data1) * 0.8)
-        train, test = data1[:train_size], data1[train_size:]
+        train, test = data1[:train_size], data1[train_size+85:]
         cols1,_ = st.columns((1,2))
         format = 'DD/MM/YYYY' 
         start_date = test['DATE'].min() 
@@ -271,7 +274,7 @@ def get_date_forcecast(data):
     else:
         data1['Date Time'] = pd.to_datetime(data1['Date Time'])
         train_size =  int(len(data1) * 0.8)
-        train, test = data1[:train_size], data1[train_size:]
+        train, test = data1[:train_size], data1[train_size+90:]
         cols1,_ = st.columns((1,2))
         format = 'DD/MM/YYYY' 
         start_date = test['Date Time'].min() 
@@ -296,7 +299,7 @@ def eda_child_timeseries(data):
         model_LSTM = model_LSTM_Amazon()
         index_1, index_2 = get_date_forcecast(data)
         st.write(data_set[index_1:index_2])
-        x,y = to_sequences(data_set[index_1-12:index_2],1,12)
+        x,y = to_sequences(data_set[index_1-12:index_2+1],1,12)
         
     elif dataset_name == 'GOOGLE.csv':
         data_set= scale_data(data['Close'].values.reshape(-1,1))
@@ -304,14 +307,14 @@ def eda_child_timeseries(data):
         model_LSTM = model_LSTM_Google()
         index_1, index_2 = get_date_forcecast(data)
         st.write(data_set[index_1:index_2])
-        x,y = to_sequences(data_set[index_1-11:index_2],1,11)
+        x,y = to_sequences(data_set[index_1-11:index_2+1],1,11)
     elif dataset_name == 'APPLE.csv':
         data_set = scale_data(data['Close'].values.reshape(-1,1))
         model = model_apple()
         model_LSTM = model_LSTM_Apple()
         index_1, index_2 = get_date_forcecast(data)
         st.write(data_set[index_1:index_2])
-        x,y = to_sequences(data_set[index_1-12:index_2],1,12)
+        x,y = to_sequences(data_set[index_1-12:index_2+1],1,12)
     elif dataset_name == 'Manhattan_NewYork_2010_24-2023.csv':
         data.ffill(inplace=True)
         data_set= scale_data(data['TMAX'].values.reshape(-1,1))
@@ -319,17 +322,16 @@ def eda_child_timeseries(data):
         model_LSTM = model_LSTM_manhattan()
         index_1, index_2 = get_date_forcecast(data)
         st.write(data_set[index_1:index_2])
-        x,y = to_sequences(data_set[index_1-85:index_2],1,85)
+        x,y = to_sequences(data_set[index_1-85:index_2+1],1,85)
     else:
         data_set= scale_data(data['Temperature'].values.reshape(-1,1))
         model = model_weather_WES()
         model_LSTM = model_LSTM_weather_WES()
         index_1, index_2 = get_date_forcecast(data)
         st.write(data_set[index_1:index_2])
-        x,y = to_sequences(data_set[index_1-90:index_2],1,90)
+        x,y = to_sequences(data_set[index_1-90:index_2+1],1,90)
         
-    sum_value = sum(data_set[index_1:index_2])
-    
+    sum_value = len(data_set[index_1:index_2])
     if st.checkbox('Compare with LSTM'):
         st.write('You have chosen to compare FFNN with LSTM')
         with st.spinner('The prediction process is ongoing...'):
